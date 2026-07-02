@@ -111,14 +111,36 @@ docker compose down          # to'xtatish (ma'lumot saqlanadi)
 docker compose up -d --build # yangilashdan keyin
 ```
 
-### Zaxira (backup) — tavsiya
-```bash
-# DB zaxirasi (kunlik cron qilish mumkin)
-docker exec bot-db-1 pg_dump -U penbot penbot > backup_$(date +%F).sql
+### Avtomatik zaxira (backup) — har 6 soatda, oxirgi 3 tasi saqlanadi
 
-# Kitob fayllari — books/ papkasini nusxalang
-tar czf books_backup.tar.gz books/
+Loyihada `scripts/backup.sh` bor: DB'ni `backups/` papkasiga oladi va faqat
+oxirgi **3 ta** backupni saqlab, eskilarini o'chiradi.
+
+**Serverda bir marta cron'ga qo'yish:**
+```bash
+chmod +x ~/bot/scripts/backup.sh
+crontab -e
 ```
+Ochilgan faylga quyidagi qatorni qo'shing (har 6 soatda: 00:00, 06:00, 12:00, 18:00):
+```
+0 */6 * * * /root/bot/scripts/backup.sh >> /root/bot/backups/backup.log 2>&1
+```
+> Yo'l `/root/bot/...` — agar boshqa foydalanuvchida bo'lsangiz, `~/bot` o'rniga to'g'ri yo'lni yozing (`pwd` bilan tekshiring).
+
+**Qo'lda tekshirish:**
+```bash
+~/bot/scripts/backup.sh        # darhol backup oladi
+ls -lh ~/bot/backups/          # backuplarni ko'rish
+```
+
+**Backupdan tiklash (kerak bo'lsa):**
+```bash
+gunzip -c ~/bot/backups/penbot_YYYY-MM-DD_HH-MM-SS.sql.gz | \
+  docker exec -i bot-db-1 psql -U penbot -d penbot
+```
+
+> Kitob fayllari (`books/`) alohida — vaqti-vaqti bilan nusxalang:
+> `tar czf ~/books_$(date +%F).tar.gz ~/bot/books/`
 
 ---
 

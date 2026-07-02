@@ -20,3 +20,6 @@ logs/
 books/*
 !books/example1.tnb
 !books/example2.tnb
+
+# Backup fayllari (runtime data)
+backups/
