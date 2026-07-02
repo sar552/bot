@@ -229,6 +229,15 @@ class BookRepo:
         book.is_active = active
         return True
 
+    async def delete(self, book_id: int) -> str | None:
+        """Kitobni o'chiradi. O'chirilgan kitob filename'ini qaytaradi (yoki None)."""
+        book = await self.get(book_id)
+        if book is None:
+            return None
+        filename = book.filename
+        await self.session.delete(book)
+        return filename
+
     async def count(self) -> int:
         return await self.session.scalar(select(func.count()).select_from(Book)) or 0
 

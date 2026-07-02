@@ -49,6 +49,8 @@ class Settings(BaseSettings):
 
     # Kitob fayllari saqlanadigan papka (konteyner ichida)
     books_dir: str = "books"
+    # Namuna kitoblarni avtomatik qo'shish (faqat test uchun; production'da False)
+    seed_example_books: bool = False
 
     @property
     def admin_ids(self) -> list[int]:

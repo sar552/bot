@@ -7,6 +7,7 @@ import re
 from aiogram import F, Router
 from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, Message
+from aiogram.utils.keyboard import InlineKeyboardBuilder
 from loguru import logger
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -17,6 +18,18 @@ from app.keyboards.admin import admin_back_kb
 from app.states.admin import AdminAddBook
 
 router = Router(name="admin_books")
+
+
+def _books_admin_kb(books):
+    """Har bir kitob yonida o'chirish tugmasi."""
+    b = InlineKeyboardBuilder()
+    for bk in books:
+        mark = "🟢" if bk.is_active else "⚪️"
+        b.button(text=f"{mark} {bk.title}", callback_data="noop")
+        b.button(text="🗑 O‘chirish", callback_data=f"{cb.ADMIN_BOOK_DEL_PREFIX}{bk.id}")
+    b.button(text="⬅️ Admin menyu", callback_data=cb.ADMIN_MENU)
+    b.adjust(2)
+    return b.as_markup()
 
 _SAFE = re.compile(r"[^A-Za-z0-9._-]+")
 
@@ -36,17 +49,59 @@ async def list_books(call: CallbackQuery, session: AsyncSession) -> None:
     books = await BookRepo(session).list_all()
     if not books:
         text = "📚 Kitoblar yo‘q. «➕ Kitob qo‘shish» orqali qo‘shing."
+        markup = admin_back_kb()
     else:
-        lines = ["📚 Kitoblar:\n"]
-        for bk in books:
-            mark = "🟢" if bk.is_active else "⚪️"
-            lines.append(f"{mark} #{bk.id} — {bk.title}  ({bk.filename})")
-        text = "\n".join(lines)
+        text = "📚 Kitoblar. O‘chirish uchun kitob yonidagi 🗑 tugmasini bosing:"
+        markup = _books_admin_kb(books)
     try:
-        await call.message.edit_text(text, reply_markup=admin_back_kb())
+        await call.message.edit_text(text, reply_markup=markup)
     except Exception:
-        await call.message.answer(text, reply_markup=admin_back_kb())
+        await call.message.answer(text, reply_markup=markup)
     await call.answer()
+
+
+@router.callback_query(F.data == "noop")
+async def noop(call: CallbackQuery) -> None:
+    await call.answer()
+
+
+@router.callback_query(F.data.startswith(cb.ADMIN_BOOK_DEL_PREFIX))
+async def delete_book(call: CallbackQuery, session: AsyncSession) -> None:
+    book_id = int(call.data.removeprefix(cb.ADMIN_BOOK_DEL_PREFIX))
+    repo = BookRepo(session)
+    filename = await repo.delete(book_id)
+    if filename is None:
+        await call.answer("Kitob topilmadi.", show_alert=True)
+        return
+    await write_audit(
+        session, actor_id=call.from_user.id, action="book_deleted",
+        entity="book", entity_id=book_id, details=filename,
+    )
+    await session.commit()
+
+    # Faylni ham o'chiramiz (best-effort — boshqa kitob ishlatmayotgan bo'lsa)
+    still_used = any(b.filename == filename for b in await repo.list_all())
+    if not still_used:
+        path = os.path.join(settings.books_dir, filename)
+        try:
+            if os.path.exists(path):
+                os.remove(path)
+        except OSError as e:  # pragma: no cover
+            logger.warning(f"Kitob faylini o'chirishda xato: {e}")
+
+    await call.answer("✅ O‘chirildi")
+    # Ro'yxatni yangilaymiz
+    books = await repo.list_all()
+    if not books:
+        text = "📚 Kitoblar yo‘q. «➕ Kitob qo‘shish» orqali qo‘shing."
+        markup = admin_back_kb()
+    else:
+        text = "📚 Kitoblar. O‘chirish uchun kitob yonidagi 🗑 tugmasini bosing:"
+        markup = _books_admin_kb(books)
+    try:
+        await call.message.edit_text(text, reply_markup=markup)
+    except Exception:
+        await call.message.answer(text, reply_markup=markup)
 
 
 @router.callback_query(F.data == cb.ADMIN_ADD_BOOK)

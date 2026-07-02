@@ -38,6 +38,7 @@ ADMIN_STATS = "adm:stats"
 ADMIN_EXPORT = "adm:export"
 ADMIN_BOOKS = "adm:books"
 ADMIN_ADD_BOOK = "adm:add_book"
+ADMIN_BOOK_DEL_PREFIX = "adm:bookdel:"   # + book_id
 ADMIN_SHEETS_SYNC = "adm:sheets_sync"
 ADMIN_MENU = "adm:menu"
 ADMIN_BROADCAST_CONFIRM = "adm:bc_confirm"

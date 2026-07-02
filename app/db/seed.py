@@ -17,7 +17,12 @@ _EXAMPLE_BOOKS = [
 
 
 async def seed_example_books() -> None:
-    """Books jadvali bo'sh bo'lsa va example fayllar mavjud bo'lsa — qo'shadi."""
+    """Books jadvali bo'sh bo'lsa va example fayllar mavjud bo'lsa — qo'shadi.
+
+    Faqat SEED_EXAMPLE_BOOKS=true bo'lsa ishlaydi (production'da o'chiq).
+    """
+    if not settings.seed_example_books:
+        return
     async with session_factory() as session:
         repo = BookRepo(session)
         if await repo.count() > 0:
