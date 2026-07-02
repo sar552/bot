@@ -1,6 +1,8 @@
 """Loyiha konfiguratsiyasi — .env dan o'qiladi (pydantic-settings)."""
 from __future__ import annotations
 
+import os
+
 from pydantic import Field
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -63,7 +65,13 @@ class Settings(BaseSettings):
 
     @property
     def sheets_enabled(self) -> bool:
-        return bool(self.google_sheets_credentials and self.google_spreadsheet_id)
+        # Faqat kalit fayli HAQIQATAN mavjud bo'lsa yoqamiz — aks holda
+        # har sync'da xato bermasligi uchun jim o'chiq qoladi.
+        return bool(
+            self.google_spreadsheet_id
+            and self.google_sheets_credentials
+            and os.path.exists(self.google_sheets_credentials)
+        )
 
 
 settings = Settings()
