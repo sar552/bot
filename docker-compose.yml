@@ -1,0 +1,35 @@
+services:
+  bot:
+    build: .
+    env_file: .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - ./secrets:/secrets:ro
+      - ./books:/app/books
+    restart: always
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: penbot
+      POSTGRES_PASSWORD: penbot
+      POSTGRES_DB: penbot
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U penbot"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    restart: always
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+
+volumes:
+  pgdata:

@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Maxfiy — HECH QACHON git'ga tushmasin
+.env
+secrets/
+
+# Loglar
+*.log
+logs/
+
+# Test/lint kesh
+.pytest_cache/
+.ruff_cache/
+
+# Kitob fayllari — faqat namunalar git'da, runtime yuklamalar kirmasin
+books/*
+!books/example1.tnb
+!books/example2.tnb
