@@ -13,14 +13,24 @@ router = Router(name="product")
 
 @router.callback_query(F.data == cb.MENU_VIDEO)
 async def show_video(call: CallbackQuery, texts) -> None:
-    if settings.product_video_file_id:
+    if settings.product_video_url:
+        # YouTube havolasi — matn + "YouTube'da ko'rish" tugmasi (after_video_kb ichida)
+        try:
+            await call.message.edit_text(texts.VIDEO_CAPTION, reply_markup=after_video_kb(texts))
+        except Exception:
+            await call.message.answer(texts.VIDEO_CAPTION, reply_markup=after_video_kb(texts))
+    elif settings.product_video_file_id:
+        # Muqobil: Telegram videosi
         await call.message.answer_video(
             video=settings.product_video_file_id,
             caption=texts.VIDEO_CAPTION,
             reply_markup=after_video_kb(texts),
         )
     else:
-        await call.message.answer(texts.VIDEO_MISSING, reply_markup=after_video_kb(texts))
+        try:
+            await call.message.edit_text(texts.VIDEO_MISSING, reply_markup=after_video_kb(texts))
+        except Exception:
+            await call.message.answer(texts.VIDEO_MISSING, reply_markup=after_video_kb(texts))
     await call.answer()
 
 

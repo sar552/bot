@@ -30,7 +30,8 @@ class Settings(BaseSettings):
     sheets_sync_interval_min: int = 10
 
     # Kontent
-    product_video_file_id: str = ""
+    product_video_url: str = ""       # YouTube (yoki boshqa) havola — tavsiya
+    product_video_file_id: str = ""   # Telegram video file_id (muqobil)
 
     # Sotuv kanallari
     channel_telegram_url: str = ""

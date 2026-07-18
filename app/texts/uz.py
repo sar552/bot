@@ -192,6 +192,7 @@ B_GO_CHANNEL = "➡️ Kanalga o‘tish"
 
 B_BUY = "🛒 Sotib olish"
 B_WATCH_VIDEO = "🎬 Video ko‘rish"
+B_WATCH_YOUTUBE = "▶️ YouTube’da ko‘rish"
 B_SALES_CHANNELS = "🛒 Sotuv kanallari"
 
 B_ENTER_CODE = "✍️ Kod kiritish"

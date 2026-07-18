@@ -67,6 +67,9 @@ def channel_link_kb(t, url: str) -> InlineKeyboardMarkup:
 
 def after_video_kb(t) -> InlineKeyboardMarkup:
     b = InlineKeyboardBuilder()
+    # YouTube havolasi bo'lsa — eng tepada ko'rish tugmasi
+    if settings.product_video_url:
+        b.button(text=t.B_WATCH_YOUTUBE, url=settings.product_video_url)
     b.button(text=t.B_BUY, callback_data=cb.MENU_CHANNELS)
     b.button(text=t.B_BONUS, callback_data=cb.MENU_BONUS)
     b.button(text=t.B_MAIN_MENU, callback_data=cb.MENU_MAIN)

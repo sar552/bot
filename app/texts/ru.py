@@ -197,6 +197,7 @@ B_GO_CHANNEL = "➡️ Перейти в канал"
 
 B_BUY = "🛒 Купить"
 B_WATCH_VIDEO = "🎬 Смотреть видео"
+B_WATCH_YOUTUBE = "▶️ Смотреть на YouTube"
 B_SALES_CHANNELS = "🛒 Каналы продаж"
 
 B_ENTER_CODE = "✍️ Ввести код"
